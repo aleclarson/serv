@@ -20,6 +20,9 @@ Service = (config) ->
   else if isType config.key, String
     cons self, "_key", config.key
 
+  if config.certAuth
+    cons self, "_certAuth", config.certAuth
+
   # NOTE: This is not used anywhere yet.
   if isType config.rate, Number
     self._rate = config.rate
@@ -41,7 +44,11 @@ Service::get = (uri) ->
   else if @_key
     query.key = @_key
 
-  return request @url + uri, {headers, query}
+  request @url + uri, {
+    certAuth: @_certAuth
+    headers
+    query
+  }
 
 Service::post = (uri, data) ->
   assertType uri, String
@@ -63,7 +70,14 @@ Service::post = (uri, data) ->
   else if @_key
     query = {key: @_key}
 
-  return request @url + uri, {method: "POST", headers, data, contentType, query}
+  request @url + uri, {
+    method: "POST"
+    certAuth: @_certAuth
+    contentType
+    data
+    headers
+    query
+  }
 
 module.exports = Service
 

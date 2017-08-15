@@ -67,6 +67,8 @@ request = (url, options) ->
     path: parts[2] + query
     method: options.method
     headers: options.headers
+    ca: options.certAuth
+    rejectUnauthorized: options.certAuth?
 
   return new Promise (resolve, reject) ->
     req = https.request opts, (res) ->
