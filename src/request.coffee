@@ -25,12 +25,11 @@ request = (url, options) ->
   # Default headers
   headers["Accept"] ?= "*/*"
 
-  query =
-    if query = options.query
-      if isType query, Object
-      then "?" + qs.stringify query
-      else "?" + query
-    else ""
+  if query = options.query
+    if isType query, Object
+      query = qs.stringify query
+    query = "?" + query if query
+  else query = ""
 
   if data = options.data
     contentType = headers["Content-Type"]
