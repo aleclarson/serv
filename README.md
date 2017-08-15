@@ -1,5 +1,5 @@
 
-# serv v1.0.0 ![stable](https://img.shields.io/badge/stability-stable-4EBA0F.svg?style=flat)
+# serv v1.0.1 ![stable](https://img.shields.io/badge/stability-stable-4EBA0F.svg?style=flat)
 
 Send requests to third-party APIs from your NodeJS server.
 
@@ -30,8 +30,9 @@ serv("goo.gl").shorten "https://github.com/aleclarson/serv"
 - `url` The base URL used with each request
 - `key` The API key added to the query of each request
 - `auth` The `Authorization` header of each request (can be a string or a function)
-- `rate` The time window (in seconds) wherein the call rate is limited.
-- `rateLimit` The number of calls before the limit is exceeded.
+- `certAuth` An authority certificate to check the remote host against (can be a string or array)
+- `rate` The time window (in seconds) wherein the call rate is limited
+- `rateLimit` The number of calls before the limit is exceeded
 - `dataType` The encoding used with POST data
 
 #### Notes
