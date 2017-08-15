@@ -63,7 +63,7 @@ request = (url, options) ->
   parts = urlRE.exec url.slice 8
   opts =
     host: parts[1]
-    path: parts[2] + query
+    path: (parts[2] or "/") + query
     method: options.method
     headers: options.headers
     ca: options.certAuth
