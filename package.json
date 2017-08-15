@@ -12,5 +12,8 @@
   "dependencies": {
     "assertType": "aleclarson/assertType#2.0.2",
     "isType": "aleclarson/isType#1.0.2"
+  },
+  "devDependencies": {
+    "mock-require": "^2.0.2"
   }
 }
