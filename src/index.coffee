@@ -4,13 +4,12 @@ registry = Object.create null
 
 Service = require "./Service"
 
-serv = (serviceId) ->
-  return registry[serviceId]
+serv = (name) ->
+  return registry[name]
 
-serv.set = (serviceId, config) ->
-  return registry[serviceId] = Service config
-
-serv.del = (serviceId) ->
-  delete registry[serviceId]
+serv.set = (name, config) ->
+  if config is null
+    delete registry[name]
+  else registry[name] = Service name, config
 
 module.exports = serv
