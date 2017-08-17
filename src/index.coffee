@@ -8,9 +8,8 @@ serv = (serviceId) ->
   return registry[serviceId]
 
 serv.set = (serviceId, config) ->
-  return registry[serviceId] = Service config
-
-serv.del = (serviceId) ->
-  delete registry[serviceId]
+  if config is null
+    delete registry[serviceId]
+  else registry[serviceId] = Service config
 
 module.exports = serv
