@@ -1,4 +1,5 @@
 
+formUrlEncoded = require "form-urlencoded"
 assertType = require "assertType"
 isType = require "isType"
 https = require "https"
@@ -41,7 +42,7 @@ request = (url, options) ->
     if isType data, Object
 
       if contentType is contentTypes.form
-        data = encodeForm data
+        data = formUrlEncoded data
 
       else
         data = JSON.stringify data
@@ -91,41 +92,6 @@ module.exports = request
 #
 # Helpers
 #
-
-encodeForm = do ->
-  pairs = []
-
-  encodePair = (key, value) ->
-    return if value is undefined
-
-    if isType value, Object
-      encodeObject value, key
-      return
-
-    if isType value, Array
-      encodeArray value, key
-      return
-
-    pairs.push encodeURIComponent(key) + "=" + encodeURIComponent(value)
-    return
-
-  encodeObject = (values, parent) ->
-    for key of values
-      encodePair parent + "[" + key + "]", values[key]
-    return
-
-  encodeArray = (values, parent) ->
-    index = -1
-    while ++index < values.length
-      encodePair parent + "[" + index + "]", values[index]
-    return
-
-  return (values) ->
-    for key of values
-      encodePair key, values[key]
-    str = pairs.join "&"
-    pairs.length = 0
-    return str
 
 readStream = (stream, callback) ->
   chunks = []
