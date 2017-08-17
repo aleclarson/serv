@@ -1,0 +1,10 @@
+{
+  "name": "serv",
+  "version": "1.1.0",
+  "main": "js/index",
+  "dependencies": {
+    "assertType": "aleclarson/assertType#2.0.2",
+    "form-urlencoded": "aleclarson/form-urlencoded#1.0.1",
+    "isType": "aleclarson/isType#1.0.2"
+  }
+}
