@@ -4,11 +4,12 @@ isType = require "isType"
 
 request = require "./request"
 
-Service = (config) ->
+Service = (name, config) ->
   assertType config, Object
   assertType config.url, String
 
   self = Object.create Service::
+  self.name = name
   self.url = config.url
 
   if isType config.auth, String
