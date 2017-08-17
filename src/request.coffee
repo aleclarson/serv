@@ -9,7 +9,7 @@ urlRE = /([^\/]+)(\/.*)?/
 
 contentTypes =
   binary: "application/octet-stream"
-  form: "application/x-www-form-urlencoded; charset=utf-8"
+  form: "application/x-www-form-urlencoded"
   json: "application/json"
   text: "text/plain; charset=utf-8"
 
@@ -43,6 +43,7 @@ request = (url, options) ->
 
       if contentType is contentTypes.form
         data = formUrlEncoded data
+        contentType += "; charset=utf-8"
 
       else
         data = JSON.stringify data
