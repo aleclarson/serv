@@ -1,31 +1,29 @@
 
-assertType = require "assertType"
-isType = require "isType"
+{assert, isValid} = require "validate"
 
 request = require "./request"
 
 Service = (name, config) ->
-  assertType config, Object
-  assertType config.url, String
+  assert config, {url: "string"}
 
   self = Object.create Service::
   self.name = name
   self.url = config.url
 
-  if isType config.auth, String
+  if isValid config.auth, "string"
     cons self, "_auth", "Basic " + new Buffer(config.auth).toString "base64"
 
-  else if isType config.auth, Function
+  else if isValid config.auth, "function"
     cons self, "_auth", config.auth()
 
-  else if isType config.key, String
+  else if isValid config.key, "string"
     cons self, "_key", config.key
 
   if config.certAuth
     cons self, "_certAuth", config.certAuth
 
   # NOTE: This is not used anywhere yet.
-  if isType config.rate, Number
+  if isValid config.rate, "number"
     self._rate = config.rate
     self._rateLimit = config.rateLimit
 
@@ -33,7 +31,7 @@ Service = (name, config) ->
   return self
 
 Service::get = (uri) ->
-  assertType uri, String
+  assert uri, "string"
 
   query = arguments[1] or {}
   headers = query.headers or {}
@@ -52,11 +50,11 @@ Service::get = (uri) ->
   }
 
 Service::post = (uri, data) ->
-  assertType uri, String
+  assert uri, "string"
 
   headers = arguments[2]
-  unless isType headers, Object
-    if isType data, Object
+  unless isValid headers, "object"
+    if isValid data, "object"
       headers = data.headers or {}
       delete data.headers
     else

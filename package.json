@@ -10,9 +10,8 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
-    "assertType": "aleclarson/assertType#2.0.2",
     "form-urlencoded": "aleclarson/form-urlencoded#1.0.1",
-    "isType": "aleclarson/isType#1.0.2"
+    "validate": "aleclarson/validate#1.3.0"
   },
   "devDependencies": {
     "mock-require": "^2.0.2"

@@ -1,7 +1,7 @@
 
+{assert, isValid} = require "validate"
+
 formUrlEncoded = require "form-urlencoded"
-assertType = require "assertType"
-isType = require "isType"
 https = require "https"
 qs = require "querystring"
 
@@ -14,20 +14,20 @@ contentTypes =
   text: "text/plain; charset=utf-8"
 
 request = (url, options) ->
-  assertType url, String
-  assertType options, Object
+  assert url, "string"
+  assert options, "object"
 
   unless url.startsWith "https://"
     throw Error "Only HTTPS requests are supported!"
 
   headers = options.headers or {}
-  assertType headers, Object
+  assert headers, "object"
 
   # Default headers
   headers["Accept"] ?= "*/*"
 
   if query = options.query
-    if isType query, Object
+    if isValid query, "object"
       query = qs.stringify query
     query = "?" + query if query
   else query = ""
@@ -36,10 +36,10 @@ request = (url, options) ->
     contentType = headers["Content-Type"]
 
     if options.contentType
-      assertType options.contentType, String
+      assert options.contentType, "string"
       contentType = contentTypes[options.contentType]
 
-    if isType data, Object
+    if isValid data, "object"
 
       if contentType is contentTypes.form
         data = formUrlEncoded data
@@ -53,7 +53,7 @@ request = (url, options) ->
       contentType ?= contentTypes.binary
 
     else
-      assertType data, String
+      assert data, "string"
       contentType ?= contentTypes.text
 
     headers["Content-Type"] = contentType
