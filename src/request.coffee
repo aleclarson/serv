@@ -2,10 +2,14 @@
 {assert, isValid} = require "validate"
 
 formUrlEncoded = require "form-urlencoded"
-https = require "https"
 qs = require "querystring"
 
 urlRE = /([^\/]+)(\/.*)?/
+schemeRE = /^[^:]+/
+
+schemes =
+  http: require "http"
+  https: require "https"
 
 contentTypes =
   binary: "application/octet-stream"
@@ -16,9 +20,6 @@ contentTypes =
 request = (url, options) ->
   assert url, "string"
   assert options, "object"
-
-  unless url.startsWith "https://"
-    throw Error "Only HTTPS requests are supported!"
 
   headers = options.headers or {}
   assert headers, "object"
@@ -62,17 +63,24 @@ request = (url, options) ->
       then data.length
       else Buffer.byteLength data
 
-  parts = urlRE.exec url.slice 8
+  scheme = schemeRE.exec(url)[0]
+  unless schemes.hasOwnProperty scheme
+    throw Error "Unsupported scheme: '#{scheme}'"
+
+  parts = urlRE.exec url.slice scheme.length + 3
   opts =
     host: parts[1]
-    path: (parts[2] or "/") + query
+    path: (parts[3] or "/") + query
     method: options.method
     headers: options.headers
-    ca: options.certAuth
-    rejectUnauthorized: options.certAuth?
+
+  if scheme is "https"
+    if options.certAuth
+    then opts.ca = options.certAuth
+    else opts.rejectUnauthorized = false
 
   return new Promise (resolve, reject) ->
-    req = https.request opts, (res) ->
+    req = schemes[scheme].request opts, (res) ->
       status = res.statusCode
       readStream res, (error, data) ->
         if error
