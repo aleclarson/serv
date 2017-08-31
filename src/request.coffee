@@ -4,7 +4,7 @@
 formUrlEncoded = require "form-urlencoded"
 qs = require "querystring"
 
-urlRE = /([^\/]+)(\/.*)?/
+urlRE = /([^\/:]+)(:[0-9]+)?(\/.*)?/
 schemeRE = /^[^:]+/
 
 schemes =
@@ -73,6 +73,9 @@ request = (url, options) ->
     path: (parts[3] or "/") + query
     method: options.method
     headers: options.headers
+
+  if parts[2]
+    opts.port = Number parts[2].slice 1
 
   if scheme is "https"
     if options.certAuth
