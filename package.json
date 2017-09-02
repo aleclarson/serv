@@ -1,6 +1,6 @@
 {
   "name": "serv",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "js/index",
   "plugins": [
     "lotus-coffee"
@@ -10,9 +10,9 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
-    "assertType": "aleclarson/assertType#2.0.2",
+    "assertValid": "aleclarson/assertValid#1.0.0",
     "form-urlencoded": "aleclarson/form-urlencoded#1.0.1",
-    "isType": "aleclarson/isType#1.0.2"
+    "isValid": "aleclarson/isValid#1.0.0"
   },
   "devDependencies": {
     "mock-require": "^2.0.2"

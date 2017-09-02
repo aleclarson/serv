@@ -1,11 +1,15 @@
 
 formUrlEncoded = require "form-urlencoded"
-assertType = require "assertType"
-isType = require "isType"
-https = require "https"
+assertValid = require "assertValid"
+isValid = require "isValid"
 qs = require "querystring"
 
-urlRE = /([^\/]+)(\/.*)?/
+urlRE = /([^\/:]+)(:[0-9]+)?(\/.*)?/
+schemeRE = /^[^:]+/
+
+schemes =
+  http: require "http"
+  https: require "https"
 
 contentTypes =
   binary: "application/octet-stream"
@@ -13,21 +17,21 @@ contentTypes =
   json: "application/json"
   text: "text/plain; charset=utf-8"
 
-request = (url, options) ->
-  assertType url, String
-  assertType options, Object
+optionTypes =
+  headers: "object?"
+  query: "string|object?"
+  data: "string|object|buffer?"
+  contentType: "string?"
 
-  unless url.startsWith "https://"
-    throw Error "Only HTTPS requests are supported!"
+request = (url, options) ->
+  assertValid url, "string"
+  assertValid options, optionTypes
 
   headers = options.headers or {}
-  assertType headers, Object
-
-  # Default headers
   headers["Accept"] ?= "*/*"
 
   if query = options.query
-    if isType query, Object
+    if isValid query, "object"
       query = qs.stringify query
     query = "?" + query if query
   else query = ""
@@ -36,10 +40,9 @@ request = (url, options) ->
     contentType = headers["Content-Type"]
 
     if options.contentType
-      assertType options.contentType, String
       contentType = contentTypes[options.contentType]
 
-    if isType data, Object
+    if isValid data, "object"
 
       if contentType is contentTypes.form
         data = formUrlEncoded data
@@ -53,7 +56,6 @@ request = (url, options) ->
       contentType ?= contentTypes.binary
 
     else
-      assertType data, String
       contentType ?= contentTypes.text
 
     headers["Content-Type"] = contentType
@@ -62,17 +64,27 @@ request = (url, options) ->
       then data.length
       else Buffer.byteLength data
 
-  parts = urlRE.exec url.slice 8
+  scheme = schemeRE.exec(url)[0]
+  unless schemes.hasOwnProperty scheme
+    throw Error "Unsupported scheme: '#{scheme}'"
+
+  parts = urlRE.exec url.slice scheme.length + 3
   opts =
     host: parts[1]
-    path: (parts[2] or "/") + query
+    path: (parts[3] or "/") + query
     method: options.method
     headers: options.headers
-    ca: options.certAuth
-    rejectUnauthorized: options.certAuth?
+
+  if parts[2]
+    opts.port = Number parts[2].slice 1
+
+  if scheme is "https"
+    if options.ssl
+    then Object.assign opts, options.ssl
+    else opts.rejectUnauthorized = false
 
   return new Promise (resolve, reject) ->
-    req = https.request opts, (res) ->
+    req = schemes[scheme].request opts, (res) ->
       status = res.statusCode
       readStream res, (error, data) ->
         if error
