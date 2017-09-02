@@ -1,7 +1,7 @@
 
-{assert, isValid} = require "validate"
-
 formUrlEncoded = require "form-urlencoded"
+assertValid = require "assertValid"
+isValid = require "isValid"
 qs = require "querystring"
 
 urlRE = /([^\/:]+)(:[0-9]+)?(\/.*)?/
@@ -17,14 +17,17 @@ contentTypes =
   json: "application/json"
   text: "text/plain; charset=utf-8"
 
+optionTypes =
+  headers: "object?"
+  query: "string|object?"
+  data: "string|object|buffer?"
+  contentType: "string?"
+
 request = (url, options) ->
-  assert url, "string"
-  assert options, "object"
+  assertValid url, "string"
+  assertValid options, optionTypes
 
   headers = options.headers or {}
-  assert headers, "object"
-
-  # Default headers
   headers["Accept"] ?= "*/*"
 
   if query = options.query
@@ -37,7 +40,6 @@ request = (url, options) ->
     contentType = headers["Content-Type"]
 
     if options.contentType
-      assert options.contentType, "string"
       contentType = contentTypes[options.contentType]
 
     if isValid data, "object"
@@ -54,7 +56,6 @@ request = (url, options) ->
       contentType ?= contentTypes.binary
 
     else
-      assert data, "string"
       contentType ?= contentTypes.text
 
     headers["Content-Type"] = contentType
@@ -78,8 +79,8 @@ request = (url, options) ->
     opts.port = Number parts[2].slice 1
 
   if scheme is "https"
-    if options.certAuth
-    then opts.ca = options.certAuth
+    if options.ssl
+    then Object.assign opts, options.ssl
     else opts.rejectUnauthorized = false
 
   return new Promise (resolve, reject) ->

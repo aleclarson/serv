@@ -1,29 +1,46 @@
 
-{assert, isValid} = require "validate"
+assertValid = require "assertValid"
+isValid = require "isValid"
 
 request = require "./request"
 
+configTypes =
+  url: "string"
+  key: "string?"
+  auth: "string|function?"
+  ssl: "object?"
+  rate: "number?"
+  rateLimit: "number?"
+  dataType: "string?"
+
+sslConfigTypes =
+  key: "string?"
+  cert: "string?"
+  ca: "string|array?"
+
 Service = (name, config) ->
-  assert config, {url: "string"}
+  assertValid name, "string"
+  assertValid config, configTypes
 
   self = Object.create Service::
   self.name = name
   self.url = config.url
 
-  if isValid config.auth, "string"
-    cons self, "_auth", "Basic " + new Buffer(config.auth).toString "base64"
-
-  else if isValid config.auth, "function"
-    cons self, "_auth", config.auth()
-
-  else if isValid config.key, "string"
+  if config.key
     cons self, "_key", config.key
 
-  if config.certAuth
-    cons self, "_certAuth", config.certAuth
+  else if config.auth
+    cons self, "_auth",
+      if isValid config.auth, "string"
+      then "Basic " + new Buffer(config.auth).toString "base64"
+      else config.auth()
+
+  if config.ssl
+    assertValid config.ssl, sslConfigTypes
+    cons self, "_ssl", config.ssl
 
   # NOTE: This is not used anywhere yet.
-  if isValid config.rate, "number"
+  if config.rate
     self._rate = config.rate
     self._rateLimit = config.rateLimit
 
@@ -31,7 +48,7 @@ Service = (name, config) ->
   return self
 
 Service::get = (uri) ->
-  assert uri, "string"
+  assertValid uri, "string"
 
   query = arguments[1] or {}
   headers = query.headers or {}
@@ -44,13 +61,13 @@ Service::get = (uri) ->
     query.key = @_key
 
   request @url + uri, {
-    certAuth: @_certAuth
     headers
     query
+    ssl: @_ssl
   }
 
 Service::post = (uri, data) ->
-  assert uri, "string"
+  assertValid uri, "string"
 
   headers = arguments[2]
   unless isValid headers, "object"
@@ -71,11 +88,11 @@ Service::post = (uri, data) ->
 
   request @url + uri, {
     method: "POST"
-    certAuth: @_certAuth
     contentType
     data
     headers
     query
+    ssl: @_ssl
   }
 
 module.exports = Service
