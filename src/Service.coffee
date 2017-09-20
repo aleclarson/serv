@@ -1,22 +1,15 @@
 
 assertValid = require "assertValid"
 isValid = require "isValid"
-
-request = require "./request"
+request = require "request"
 
 configTypes =
   url: "string"
-  key: "string?"
   auth: "string|function?"
-  ssl: "object?"
-  rate: "number?"
-  rateLimit: "number?"
+  query: "object?"
+  ssl: [key: "string?", cert: "string?", ca: "string|array?", "?"]
+  throttle: [rate: "number", limit: "number", "?"]
   dataType: "string?"
-
-sslConfigTypes =
-  key: "string?"
-  cert: "string?"
-  ca: "string|array?"
 
 Service = (name, config) ->
   assertValid name, "string"
@@ -26,23 +19,21 @@ Service = (name, config) ->
   self.name = name
   self.url = config.url
 
-  if config.key
-    cons self, "_key", config.key
-
-  else if config.auth
+  if config.auth
     cons self, "_auth",
       if isValid config.auth, "string"
       then "Basic " + new Buffer(config.auth).toString "base64"
       else config.auth()
 
+  if config.query
+    cons self, "_query", config.query
+
   if config.ssl
-    assertValid config.ssl, sslConfigTypes
     cons self, "_ssl", config.ssl
 
   # NOTE: This is not used anywhere yet.
-  if config.rate
-    self._rate = config.rate
-    self._rateLimit = config.rateLimit
+  if config.throttle
+    cons self, "_throttle", config.throttle
 
   cons self, "_dataType", config.dataType or "json"
   return self
@@ -57,8 +48,8 @@ Service::get = (uri) ->
   if @_auth
     headers["Authorization"] = @_auth
 
-  else if @_key
-    query.key = @_key
+  if @_query
+    Object.assign query, @_query
 
   request @url + uri, {
     headers
@@ -83,8 +74,8 @@ Service::post = (uri, data) ->
   if @_auth
     headers["Authorization"] = @_auth
 
-  else if @_key
-    query = {key: @_key}
+  if @_query
+    query = Object.assign {}, @_query
 
   request @url + uri, {
     method: "POST"
