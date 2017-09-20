@@ -12,7 +12,8 @@
   "dependencies": {
     "assertValid": "aleclarson/assertValid#1.0.0",
     "form-urlencoded": "aleclarson/form-urlencoded#1.0.1",
-    "isValid": "aleclarson/isValid#1.0.0"
+    "isValid": "aleclarson/isValid#1.0.0",
+    "request": "aleclarson/request#1.0.0"
   },
   "devDependencies": {
     "mock-require": "^2.0.2"

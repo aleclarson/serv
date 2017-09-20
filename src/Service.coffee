@@ -1,8 +1,7 @@
 
 assertValid = require "assertValid"
 isValid = require "isValid"
-
-request = require "./request"
+request = require "request"
 
 configTypes =
   url: "string"
