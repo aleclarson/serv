@@ -6,8 +6,8 @@ request = require "./request"
 
 configTypes =
   url: "string"
-  key: "string?"
   auth: "string|function?"
+  query: "object?"
   ssl: "object?"
   rate: "number?"
   rateLimit: "number?"
@@ -26,14 +26,14 @@ Service = (name, config) ->
   self.name = name
   self.url = config.url
 
-  if config.key
-    cons self, "_key", config.key
-
-  else if config.auth
+  if config.auth
     cons self, "_auth",
       if isValid config.auth, "string"
       then "Basic " + new Buffer(config.auth).toString "base64"
       else config.auth()
+
+  if config.query
+    cons self, "_query", config.query
 
   if config.ssl
     assertValid config.ssl, sslConfigTypes
@@ -57,8 +57,8 @@ Service::get = (uri) ->
   if @_auth
     headers["Authorization"] = @_auth
 
-  else if @_key
-    query.key = @_key
+  if @_query
+    Object.assign query, @_query
 
   request @url + uri, {
     headers
@@ -83,8 +83,8 @@ Service::post = (uri, data) ->
   if @_auth
     headers["Authorization"] = @_auth
 
-  else if @_key
-    query = {key: @_key}
+  if @_query
+    query = Object.assign {}, @_query
 
   request @url + uri, {
     method: "POST"
