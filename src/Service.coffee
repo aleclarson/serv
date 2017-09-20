@@ -8,15 +8,9 @@ configTypes =
   url: "string"
   auth: "string|function?"
   query: "object?"
-  ssl: "object?"
-  rate: "number?"
-  rateLimit: "number?"
+  ssl: [key: "string?", cert: "string?", ca: "string|array?", "?"]
+  throttle: [rate: "number", limit: "number", "?"]
   dataType: "string?"
-
-sslConfigTypes =
-  key: "string?"
-  cert: "string?"
-  ca: "string|array?"
 
 Service = (name, config) ->
   assertValid name, "string"
@@ -36,13 +30,11 @@ Service = (name, config) ->
     cons self, "_query", config.query
 
   if config.ssl
-    assertValid config.ssl, sslConfigTypes
     cons self, "_ssl", config.ssl
 
   # NOTE: This is not used anywhere yet.
-  if config.rate
-    self._rate = config.rate
-    self._rateLimit = config.rateLimit
+  if config.throttle
+    cons self, "_throttle", config.throttle
 
   cons self, "_dataType", config.dataType or "json"
   return self
