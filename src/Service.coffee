@@ -38,10 +38,43 @@ Service = (name, config) ->
   cons self, "_dataType", config.dataType or "json"
   return self
 
-Service::get = (uri) ->
+Service::get = (uri, query) ->
   assertValid uri, "string"
+  assertValid query, "object?"
+  sendQuery.call this, "GET", uri, query
 
-  query = arguments[1] or {}
+Service::delete = (uri, query) ->
+  assertValid uri, "string"
+  assertValid query, "object?"
+  sendQuery.call this, "DELETE", uri, query
+
+Service::post = (uri, data) ->
+  assertValid uri, "string"
+  assertValid data, "object|buffer|string?"
+  sendBody.call this, "POST", uri, data
+
+Service::put = (uri, data) ->
+  assertValid uri, "string"
+  assertValid data, "object|buffer|string?"
+  sendBody.call this, "PUT", uri, data
+
+Service::patch = (uri, data) ->
+  assertValid uri, "string"
+  assertValid data, "object|buffer|string?"
+  sendBody.call this, "PATCH", uri, data
+
+module.exports = Service
+
+#
+# Helpers
+#
+
+# Define a constant, non-enumerable property
+cons = (obj, key, value) ->
+  Object.defineProperty obj, key, {value}
+
+sendQuery = (method, uri, query = {}) ->
+
   headers = query.headers or {}
   delete query.headers
 
@@ -57,8 +90,7 @@ Service::get = (uri) ->
     ssl: @_ssl
   }
 
-Service::post = (uri, data) ->
-  assertValid uri, "string"
+sendBody = (method, uri, data) ->
 
   headers = arguments[2]
   unless isValid headers, "object"
@@ -85,13 +117,3 @@ Service::post = (uri, data) ->
     query
     ssl: @_ssl
   }
-
-module.exports = Service
-
-#
-# Helpers
-#
-
-# Define a constant, non-enumerable property
-cons = (obj, key, value) ->
-  Object.defineProperty obj, key, {value}
