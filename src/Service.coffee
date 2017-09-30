@@ -78,6 +78,9 @@ sendQuery = (method, uri, query = {}) ->
   headers = query.headers or {}
   delete query.headers
 
+  if @cookie
+    headers["Cookie"] = @cookie
+
   if @_auth
     headers["Authorization"] = @_auth
 
@@ -102,6 +105,9 @@ sendBody = (method, uri, data) ->
 
   unless headers["Content-Type"]
     contentType = @_dataType
+
+  if @cookie
+    headers["Cookie"] = @cookie
 
   if @_auth
     headers["Authorization"] = @_auth
