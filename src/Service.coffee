@@ -77,10 +77,14 @@ module.exports = Service
 cons = (obj, key, value) ->
   Object.defineProperty obj, key, {value}
 
-sendQuery = (method, uri, query = {}) ->
+sendQuery = (method, uri, query) ->
 
-  headers = query.headers or {}
-  delete query.headers
+  if query?
+    if isValid query.headers, "object"
+      {headers} = query
+      delete query.headers
+    else headers = {}
+  else headers = {}
 
   if @cookie
     headers["Cookie"] = @cookie
@@ -89,7 +93,9 @@ sendQuery = (method, uri, query = {}) ->
     headers["Authorization"] = @_auth
 
   if @_query
-    Object.assign query, @_query
+    if query
+    then Object.assign query, @_query
+    else query = @_query
 
   request @url + uri, {
     headers
@@ -100,13 +106,18 @@ sendQuery = (method, uri, query = {}) ->
 
 sendBody = (method, uri, data) ->
 
-  headers = arguments[2]
-  unless isValid headers, "object"
-    if isValid data, "object"
-      headers = data.headers or {}
-      delete data.headers
+  if data?
+    {query, headers} = data
+    unless data.data?
+      if query?
+        delete data.query
+      if headers?
+        delete data.headers
+      else headers = {}
     else
-      headers = {}
+      {data} = data
+      headers ?= {}
+  else headers = {}
 
   unless headers["Content-Type"]
     contentType = @_dataType
@@ -118,7 +129,9 @@ sendBody = (method, uri, data) ->
     headers["Authorization"] = @_auth
 
   if @_query
-    query = Object.assign {}, @_query
+    if query
+    then Object.assign query, @_query
+    else query = @_query
 
   request @url + uri, {
     method: "POST"
