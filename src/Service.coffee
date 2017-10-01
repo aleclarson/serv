@@ -98,6 +98,7 @@ sendQuery = (method, uri, query) ->
     else query = @_query
 
   request @url + uri, {
+    method
     headers
     query
     ssl: @_ssl
@@ -134,11 +135,11 @@ sendBody = (method, uri, data) ->
     else query = @_query
 
   request @url + uri, {
-    method: "POST"
-    contentType
-    data
+    method
     headers
     query
+    data
+    contentType
     ssl: @_ssl
     debug: @_debug
   }
