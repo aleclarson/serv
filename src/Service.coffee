@@ -10,6 +10,7 @@ configTypes =
   ssl: [key: "string?", cert: "string?", ca: "string|array?", "?"]
   throttle: [rate: "number", limit: "number", "?"]
   dataType: "string?"
+  debug: "boolean?"
 
 Service = (name, config) ->
   assertValid name, "string"
@@ -18,6 +19,9 @@ Service = (name, config) ->
   self = Object.create Service::
   self.name = name
   self.url = config.url
+
+  if config.debug
+    cons self, "_debug", true
 
   if config.auth
     cons self, "_auth",
@@ -91,6 +95,7 @@ sendQuery = (method, uri, query = {}) ->
     headers
     query
     ssl: @_ssl
+    debug: @_debug
   }
 
 sendBody = (method, uri, data) ->
@@ -122,4 +127,5 @@ sendBody = (method, uri, data) ->
     headers
     query
     ssl: @_ssl
+    debug: @_debug
   }
