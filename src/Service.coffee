@@ -10,6 +10,7 @@ configTypes =
   ssl: [key: "string?", cert: "string?", ca: "string|array?", "?"]
   throttle: [rate: "number", limit: "number", "?"]
   dataType: "string?"
+  debug: "boolean?"
 
 Service = (name, config) ->
   assertValid name, "string"
@@ -18,6 +19,9 @@ Service = (name, config) ->
   self = Object.create Service::
   self.name = name
   self.url = config.url
+
+  if config.debug
+    cons self, "_debug", true
 
   if config.auth
     cons self, "_auth",
@@ -38,53 +42,30 @@ Service = (name, config) ->
   cons self, "_dataType", config.dataType or "json"
   return self
 
-Service::get = (uri) ->
+Service::get = (uri, query) ->
   assertValid uri, "string"
+  assertValid query, "object?"
+  sendQuery.call this, "GET", uri, query
 
-  query = arguments[1] or {}
-  headers = query.headers or {}
-  delete query.headers
-
-  if @_auth
-    headers["Authorization"] = @_auth
-
-  if @_query
-    Object.assign query, @_query
-
-  request @url + uri, {
-    headers
-    query
-    ssl: @_ssl
-  }
+Service::delete = (uri, query) ->
+  assertValid uri, "string"
+  assertValid query, "object?"
+  sendQuery.call this, "DELETE", uri, query
 
 Service::post = (uri, data) ->
   assertValid uri, "string"
+  assertValid data, "object|buffer|string?"
+  sendBody.call this, "POST", uri, data
 
-  headers = arguments[2]
-  unless isValid headers, "object"
-    if isValid data, "object"
-      headers = data.headers or {}
-      delete data.headers
-    else
-      headers = {}
+Service::put = (uri, data) ->
+  assertValid uri, "string"
+  assertValid data, "object|buffer|string?"
+  sendBody.call this, "PUT", uri, data
 
-  unless headers["Content-Type"]
-    contentType = @_dataType
-
-  if @_auth
-    headers["Authorization"] = @_auth
-
-  if @_query
-    query = Object.assign {}, @_query
-
-  request @url + uri, {
-    method: "POST"
-    contentType
-    data
-    headers
-    query
-    ssl: @_ssl
-  }
+Service::patch = (uri, data) ->
+  assertValid uri, "string"
+  assertValid data, "object|buffer|string?"
+  sendBody.call this, "PATCH", uri, data
 
 module.exports = Service
 
@@ -95,3 +76,70 @@ module.exports = Service
 # Define a constant, non-enumerable property
 cons = (obj, key, value) ->
   Object.defineProperty obj, key, {value}
+
+sendQuery = (method, uri, query) ->
+
+  if query?
+    if isValid query.headers, "object"
+      {headers} = query
+      delete query.headers
+    else headers = {}
+  else headers = {}
+
+  if @cookie
+    headers["Cookie"] = @cookie
+
+  if @_auth
+    headers["Authorization"] = @_auth
+
+  if @_query
+    if query
+    then Object.assign query, @_query
+    else query = @_query
+
+  request @url + uri, {
+    method
+    headers
+    query
+    ssl: @_ssl
+    debug: @_debug
+  }
+
+sendBody = (method, uri, data) ->
+
+  if data?
+    {query, headers} = data
+    unless data.data?
+      if query?
+        delete data.query
+      if headers?
+        delete data.headers
+      else headers = {}
+    else
+      {data} = data
+      headers ?= {}
+  else headers = {}
+
+  unless headers["Content-Type"]
+    contentType = @_dataType
+
+  if @cookie
+    headers["Cookie"] = @cookie
+
+  if @_auth
+    headers["Authorization"] = @_auth
+
+  if @_query
+    if query
+    then Object.assign query, @_query
+    else query = @_query
+
+  request @url + uri, {
+    method
+    headers
+    query
+    data
+    contentType
+    ssl: @_ssl
+    debug: @_debug
+  }
