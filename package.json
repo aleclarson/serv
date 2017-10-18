@@ -1,0 +1,11 @@
+{
+  "name": "serv",
+  "version": "1.4.1",
+  "main": "js/index",
+  "dependencies": {
+    "assertValid": "aleclarson/assertValid#1.0.1",
+    "form-urlencoded": "aleclarson/form-urlencoded#1.0.1",
+    "isValid": "aleclarson/isValid#1.0.1",
+    "request": "aleclarson/request#1.1.0"
+  }
+}
