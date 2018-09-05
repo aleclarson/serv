@@ -8,6 +8,7 @@ configTypes =
   auth: "string|function?"
   query: "object?"
   ssl: [key: "string?", cert: "string?", ca: "string|array?", "?"]
+  host: "string|boolean?"
   throttle: [rate: "number", limit: "number", "?"]
   dataType: "string?"
   debug: "boolean?"
@@ -19,6 +20,7 @@ Service = (name, config) ->
   self = Object.create Service::
   self.name = name
   self.url = config.url
+  self.host = config.host ? true
 
   if config.debug
     cons self, "_debug", true
@@ -92,6 +94,9 @@ sendQuery = (method, uri, query) ->
   if @_auth
     headers["Authorization"] = @_auth
 
+  if typeof @host is "string"
+    headers["Host"] = @host
+
   if @_query
     if query
     then Object.assign query, @_query
@@ -103,13 +108,14 @@ sendQuery = (method, uri, query) ->
     query
     ssl: @_ssl
     debug: @_debug
+    setHost: @host isnt false
   }
 
 sendBody = (method, uri, data) ->
 
-  if data?
+  if isValid data, "object"
     {query, headers} = data
-    unless data.data?
+    unless data.hasOwnProperty "data"
       if query?
         delete data.query
       if headers?
@@ -129,6 +135,9 @@ sendBody = (method, uri, data) ->
   if @_auth
     headers["Authorization"] = @_auth
 
+  if typeof @host is "string"
+    headers["Host"] = @host
+
   if @_query
     if query
     then Object.assign query, @_query
@@ -142,4 +151,5 @@ sendBody = (method, uri, data) ->
     contentType
     ssl: @_ssl
     debug: @_debug
+    setHost: @host isnt false
   }
